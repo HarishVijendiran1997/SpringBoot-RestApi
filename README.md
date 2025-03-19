@@ -40,4 +40,3 @@ The app uses **custom exceptions** to handle cases like missing users. Example e
    ```  
 
 ---  
-Let me know if you need any changes! 🚀😊
