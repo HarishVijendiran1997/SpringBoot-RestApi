@@ -1,12 +1,11 @@
 package com.harish.app.rest.ApiController;
 
+import com.harish.app.rest.Exceptions.UserNotFoundException;
 import com.harish.app.rest.Models.User;
 import com.harish.app.rest.Repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,8 +26,26 @@ public class ApiControllers {
     }
 
     @PostMapping(value = "/users")
-    public String createUser(@RequestBody User user) {
-        userRepo.save(user);
-        return "User created";
+    public User createUser(@RequestBody User user) {
+        return userRepo.save(user);
+    }
+
+    @PutMapping(value = "/users/{id}")
+    public User updateUser(@PathVariable Long id, @RequestBody User user) {
+        return userRepo.findById(id).map(existingUser -> {
+            existingUser.setFirstName(user.getFirstName());
+            existingUser.setLastName(user.getLastName());
+            existingUser.setAge(user.getAge());
+            existingUser.setOccupation(user.getOccupation());
+            return userRepo.save(existingUser);
+        }).orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    @DeleteMapping(value = "/users/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        return userRepo.findById(id).map(user -> {
+            userRepo.delete(user);
+            return ResponseEntity.ok().body("User with ID" + id + "deleted successfully");
+        }).orElseThrow(() -> new UserNotFoundException(id));
     }
 }
